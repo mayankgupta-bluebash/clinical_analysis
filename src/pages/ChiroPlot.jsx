@@ -1,8 +1,12 @@
 import React from 'react';
 import { useRef, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Menu } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { jsPDF } from 'jspdf';
 import dicomParser from 'dicom-parser';
 
-const ClinicalAnalysis = () => {
+const ChiroPlot = () => {
   const canvasRef = useRef(null);
   const [selectedRegion, setSelectedRegion] = useState('Spinal');
   const [pinPoints, setPinPoints] = useState([]);
@@ -25,28 +29,22 @@ const ClinicalAnalysis = () => {
     setShowLabels(updated);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFile = (file) => {
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function (event) {
       try {
         const arrayBuffer = event.target.result;
         const byteArray = new Uint8Array(arrayBuffer);
         const dataSet = dicomParser.parseDicom(byteArray);
-
         const width = dataSet.uint16('x00280011');
         const height = dataSet.uint16('x00280010');
         const pixelDataElement = dataSet.elements.x7fe00010;
-
         const pixelData = new Uint8Array(dataSet.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
-
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         canvas.width = width;
         canvas.height = height;
-
         const imageData = ctx.createImageData(width, height);
         for (let i = 0; i < pixelData.length; i++) {
           const value = pixelData[i];
@@ -55,7 +53,6 @@ const ClinicalAnalysis = () => {
           imageData.data[i * 4 + 2] = value;
           imageData.data[i * 4 + 3] = 255;
         }
-
         ctx.putImageData(imageData, 0, 0);
         setDicomImageData(imageData);
         setPinPoints([]);
@@ -65,11 +62,21 @@ const ClinicalAnalysis = () => {
         console.error(err);
       }
     };
-
     reader.readAsArrayBuffer(file);
   };
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: { 'application/dicom': ['.dcm'] },
+    multiple: false,
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles && acceptedFiles.length > 0) {
+        handleFile(acceptedFiles[0]);
+      }
+    },
+  });
+
   const handleCanvasClick = (e) => {
+    if (pinPoints.length >= REGISTRATION_NAMES.length) return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -124,12 +131,20 @@ const ClinicalAnalysis = () => {
     setLineDrawn(true);
   };
 
-  const handleDownload = () => {
+  const handleDownloadJPG = () => {
     const canvas = canvasRef.current;
     const link = document.createElement('a');
     link.download = 'clinical-analysis.jpg';
     link.href = canvas.toDataURL('image/jpeg', 0.95);
     link.click();
+  };
+
+  const handleDownloadPDF = () => {
+    const canvas = canvasRef.current;
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+    pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+    pdf.save('clinical-analysis.pdf');
   };
 
   const handleReset = () => {
@@ -147,7 +162,7 @@ const ClinicalAnalysis = () => {
 
   return (
     <div className='min-h-screen bg-green-50 w-full max-w-none p-4'>
-      <h1 className='text-3xl font-extrabold text-center text-green-800 drop-shadow-sm mb-2'>Clinical Analysis</h1>
+      <h1 className='text-3xl font-extrabold text-center text-green-800 drop-shadow-sm mb-2'>Chiro Plot</h1>
       <div className='grid grid-cols-12 gap-4'>
         <div className='col-start-1 col-end-3'>
           <div className='w-full flex flex-col items-start mb-2'>
@@ -168,12 +183,14 @@ const ClinicalAnalysis = () => {
         </div>
         <div className='col-start-3 col-end-10'>
           <div className='flex flex-col items-center'>
-            <input
-              type='file'
-              accept='.dcm'
-              onChange={handleFileChange}
-              className='file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700 focus:file:ring-2 focus:file:ring-green-400 transition mb-2'
-            />
+            <div
+              {...getRootProps()}
+              className={`w-full mb-2 p-4 border-2 border-dashed rounded-lg transition cursor-pointer ${
+                isDragActive ? 'border-green-600 bg-green-100' : 'border-green-300 bg-white'
+              }`}>
+              <input {...getInputProps()} />
+              <p className='text-green-700 text-center font-medium'>{isDragActive ? 'Drop the DICOM file here...' : 'Drag & drop a DICOM (.dcm) file here, or click to select'}</p>
+            </div>
             <div className='bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center'>
               <canvas
                 ref={canvasRef}
@@ -216,14 +233,47 @@ const ClinicalAnalysis = () => {
               className='px-5 py-2 bg-white text-green-700 border border-green-400 rounded-lg font-semibold hover:bg-green-50 focus:ring-2 focus:ring-green-400 shadow transition'>
               Reset
             </button>
-            <button
-              onClick={handleDownload}
-              disabled={!lineDrawn}
-              className={`px-5 py-2 rounded-lg font-semibold shadow transition border ${
-                lineDrawn ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
-              }`}>
-              Download
-            </button>
+            <Menu
+              as='div'
+              className='relative inline-block text-left'>
+              <div>
+                <Menu.Button
+                  disabled={!lineDrawn}
+                  className={`px-5 py-2 rounded-lg font-semibold shadow transition border flex items-center gap-2 ${
+                    lineDrawn ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
+                  }`}>
+                  Download <ChevronDownIcon className='w-5 h-5' />
+                </Menu.Button>
+              </div>
+              <Menu.Items className='absolute right-0 mt-2 w-44 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg focus:outline-none z-10'>
+                <div className='py-1'>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={handleDownloadJPG}
+                        disabled={!lineDrawn}
+                        className={`w-full text-left px-4 py-2 text-sm ${active ? 'bg-green-100 text-green-800' : 'text-gray-700'} ${
+                          !lineDrawn ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}>
+                        Download as JPG
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={handleDownloadPDF}
+                        disabled={!lineDrawn}
+                        className={`w-full text-left px-4 py-2 text-sm ${active ? 'bg-green-100 text-green-800' : 'text-gray-700'} ${
+                          !lineDrawn ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}>
+                        Download as PDF
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Menu>
           </div>
         </div>
       </div>
@@ -231,7 +281,7 @@ const ClinicalAnalysis = () => {
   );
 };
 
-export default ClinicalAnalysis;
+export default ChiroPlot;
 
 const REGISTRATION_OPTIONS = {
   Spinal: [

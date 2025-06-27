@@ -1,6 +1,6 @@
 import React from 'react';
-import ClinicalAnalysis from './ClinicalAnalysis';
+import ChiroPlot from './ChiroPlot';
 
 export default function App() {
-  return <ClinicalAnalysis />;
+  return <ChiroPlot />;
 }
