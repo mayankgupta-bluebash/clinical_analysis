@@ -8,6 +8,14 @@ module.exports = {
   rebuildConfig: {},
   makers: [
     {
+      name: '@electron-forge/maker-wix',
+      config: {
+        language: 1033,
+        manufacturer: 'Aligned Chiro Plot',
+        upgradeCode: 'D4F3F52B-FE9D-4D8C-A3E0-EXAMPLE123456',
+      },
+    },
+    {
       name: '@electron-forge/maker-squirrel',
       config: {
         name: 'ChiroPlot',
