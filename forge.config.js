@@ -12,7 +12,7 @@ module.exports = {
       config: {
         language: 1033,
         manufacturer: 'Aligned Chiro Plot',
-        upgradeCode: 'D4F3F52B-FE9D-4D8C-A3E0-EXAMPLE123456',
+        upgradeCode: 'e79e4c8f-9d59-4c58-9b0c-2e1049e6513f',
       },
     },
     {
