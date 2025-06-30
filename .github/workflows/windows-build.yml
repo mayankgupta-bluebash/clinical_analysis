@@ -1,0 +1,30 @@
+name: Build Windows App
+
+on:
+  push:
+    branches: [main] # or your deploy branch
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Make Windows Build
+        run: npm run make:win
+
+      - name: Upload .exe Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: out/make/squirrel.windows/x64/

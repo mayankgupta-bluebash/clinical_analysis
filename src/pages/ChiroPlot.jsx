@@ -10,9 +10,12 @@ const ChiroPlot = () => {
   const canvasRef = useRef(null);
   const [selectedRegion, setSelectedRegion] = useState('Spinal');
   const [pinPoints, setPinPoints] = useState([]);
+  const [actualPoints, setActualPoints] = useState([]);
   const [showLabels, setShowLabels] = useState(REGISTRATION_OPTIONS['Spinal'].map(() => true));
   const [dicomImageData, setDicomImageData] = useState(null);
   const [lineDrawn, setLineDrawn] = useState(false);
+  const [actualLineDrawn, setActualLineDrawn] = useState(false);
+  const [drawingActual, setDrawingActual] = useState(false);
 
   const REGISTRATION_NAMES = REGISTRATION_OPTIONS[selectedRegion];
 
@@ -20,6 +23,7 @@ const ChiroPlot = () => {
     const region = e.target.value;
     setSelectedRegion(region);
     setPinPoints([]);
+    setActualPoints([]);
     setShowLabels(REGISTRATION_OPTIONS[region].map(() => true));
   };
 
@@ -56,6 +60,7 @@ const ChiroPlot = () => {
         ctx.putImageData(imageData, 0, 0);
         setDicomImageData(imageData);
         setPinPoints([]);
+        setActualPoints([]);
         setShowLabels(REGISTRATION_OPTIONS[selectedRegion].map(() => true));
       } catch (err) {
         alert('DICOM parsing failed: ' + err.message);
@@ -76,59 +81,102 @@ const ChiroPlot = () => {
   });
 
   const handleCanvasClick = (e) => {
-    if (pinPoints.length >= REGISTRATION_NAMES.length) return;
+    if (!drawingActual && pinPoints.length >= REGISTRATION_NAMES.length) return;
+    if (drawingActual && actualPoints.length >= REGISTRATION_NAMES.length) return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const name = REGISTRATION_NAMES[pinPoints.length];
-    const newPoints = [...pinPoints, { x, y, name }];
-    setPinPoints(newPoints);
+    const name = REGISTRATION_NAMES[drawingActual ? actualPoints.length : pinPoints.length];
+    if (!drawingActual) {
+      const newPoints = [...pinPoints, { x, y, name }];
+      setPinPoints(newPoints);
+      drawDot(canvas, x, y, name, '#ef4444', '#b91c1c');
+    } else {
+      const newPoints = [...actualPoints, { x, y, name }];
+      setActualPoints(newPoints);
+      drawDot(canvas, x, y, name, '#2563eb', '#1d4ed8');
+    }
+  };
 
+  function drawDot(canvas, x, y, name, fill, shadow, showLabel = true) {
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.arc(x, y, 2, 0, 2 * Math.PI);
-    ctx.fillStyle = '#22c55e';
-    ctx.shadowColor = '#16a34a';
+    ctx.fillStyle = fill;
+    ctx.shadowColor = shadow;
     ctx.shadowBlur = 8;
     ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.font = 'bold 14px Arial';
-    ctx.strokeStyle = '#16a34a';
-    ctx.lineWidth = 1;
-    ctx.strokeText(name, x + 12, y - 12);
-    ctx.fillStyle = '#22c55e';
-    ctx.globalAlpha = 0.85;
-    ctx.fillText(name, x + 12, y - 12);
-    ctx.globalAlpha = 1;
-  };
+    if (showLabel) {
+      ctx.font = 'bold 14px Arial';
+      ctx.strokeStyle = shadow;
+      ctx.lineWidth = 1;
+      ctx.strokeText(name, x + 12, y - 12);
+      ctx.fillStyle = fill;
+      ctx.globalAlpha = 0.85;
+      ctx.fillText(name, x + 12, y - 12);
+      ctx.globalAlpha = 1;
+    }
+  }
 
   const drawLine = () => {
-    if (pinPoints.length < 2) {
-      alert('Please pin at least two points.');
-      return;
-    }
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    // Clear canvas and redraw DICOM image if present
-    if (dicomImageData) {
-      ctx.putImageData(dicomImageData, 0, 0);
+    if (!drawingActual) {
+      if (pinPoints.length < 2) {
+        alert('Please pin at least two points.');
+        return;
+      }
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (dicomImageData) {
+        ctx.putImageData(dicomImageData, 0, 0);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.beginPath();
+      ctx.moveTo(pinPoints[0].x, pinPoints[0].y);
+      for (let i = 1; i < pinPoints.length; i++) {
+        ctx.lineTo(pinPoints[i].x, pinPoints[i].y);
+      }
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      pinPoints.forEach((pt) => drawDot(canvas, pt.x, pt.y, pt.name, '#ef4444', '#b91c1c', false));
+      setLineDrawn(true);
+      setDrawingActual(true);
     } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (actualPoints.length < 2) {
+        alert('Please pin at least two points for the actual line.');
+        return;
+      }
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (dicomImageData) {
+        ctx.putImageData(dicomImageData, 0, 0);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.beginPath();
+      ctx.moveTo(pinPoints[0].x, pinPoints[0].y);
+      for (let i = 1; i < pinPoints.length; i++) {
+        ctx.lineTo(pinPoints[i].x, pinPoints[i].y);
+      }
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(actualPoints[0].x, actualPoints[0].y);
+      for (let i = 1; i < actualPoints.length; i++) {
+        ctx.lineTo(actualPoints[i].x, actualPoints[i].y);
+      }
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      pinPoints.forEach((pt) => drawDot(canvas, pt.x, pt.y, pt.name, '#ef4444', '#b91c1c', false));
+      actualPoints.forEach((pt) => drawDot(canvas, pt.x, pt.y, pt.name, '#2563eb', '#1d4ed8', false));
+      setActualLineDrawn(true);
+      setDrawingActual(false);
     }
-    // Draw the line in red
-    ctx.beginPath();
-    ctx.moveTo(pinPoints[0].x, pinPoints[0].y);
-    for (let i = 1; i < pinPoints.length; i++) {
-      ctx.lineTo(pinPoints[i].x, pinPoints[i].y);
-    }
-    ctx.strokeStyle = '#ef4444'; // Tailwind red-500
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    // Remove points and labels from state
-    setPinPoints([]);
-    setShowLabels(REGISTRATION_OPTIONS[selectedRegion].map(() => true));
-    setLineDrawn(true);
   };
 
   const handleDownloadJPG = () => {
@@ -149,8 +197,11 @@ const ChiroPlot = () => {
 
   const handleReset = () => {
     setPinPoints([]);
+    setActualPoints([]);
     setShowLabels(REGISTRATION_OPTIONS[selectedRegion].map(() => true));
     setLineDrawn(false);
+    setActualLineDrawn(false);
+    setDrawingActual(false);
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (dicomImageData) {
@@ -194,8 +245,8 @@ const ChiroPlot = () => {
             <div className='bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center'>
               <canvas
                 ref={canvasRef}
-                width={320}
-                height={320}
+                width={520}
+                height={520}
                 onClick={handleCanvasClick}
                 className='border-2 border-green-300 rounded-xl shadow-md cursor-crosshair mb-2'
               />
@@ -226,7 +277,7 @@ const ChiroPlot = () => {
             <button
               onClick={drawLine}
               className='px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 focus:ring-2 focus:ring-green-400 shadow transition'>
-              Draw
+              {drawingActual ? 'Draw Actual (Blue)' : lineDrawn ? 'Draw Actual (Blue)' : 'Draw Patient (Red)'}
             </button>
             <button
               onClick={handleReset}
@@ -238,9 +289,9 @@ const ChiroPlot = () => {
               className='relative inline-block text-left'>
               <div>
                 <Menu.Button
-                  disabled={!lineDrawn}
+                  disabled={!actualLineDrawn}
                   className={`px-5 py-2 rounded-lg font-semibold shadow transition border flex items-center gap-2 ${
-                    lineDrawn ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
+                    actualLineDrawn ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
                   }`}>
                   Download <ChevronDownIcon className='w-5 h-5' />
                 </Menu.Button>
@@ -251,9 +302,9 @@ const ChiroPlot = () => {
                     {({ active }) => (
                       <button
                         onClick={handleDownloadJPG}
-                        disabled={!lineDrawn}
+                        disabled={!actualLineDrawn}
                         className={`w-full text-left px-4 py-2 text-sm ${active ? 'bg-green-100 text-green-800' : 'text-gray-700'} ${
-                          !lineDrawn ? 'opacity-50 cursor-not-allowed' : ''
+                          !actualLineDrawn ? 'opacity-50 cursor-not-allowed' : ''
                         }`}>
                         Download as JPG
                       </button>
@@ -263,9 +314,9 @@ const ChiroPlot = () => {
                     {({ active }) => (
                       <button
                         onClick={handleDownloadPDF}
-                        disabled={!lineDrawn}
+                        disabled={!actualLineDrawn}
                         className={`w-full text-left px-4 py-2 text-sm ${active ? 'bg-green-100 text-green-800' : 'text-gray-700'} ${
-                          !lineDrawn ? 'opacity-50 cursor-not-allowed' : ''
+                          !actualLineDrawn ? 'opacity-50 cursor-not-allowed' : ''
                         }`}>
                         Download as PDF
                       </button>

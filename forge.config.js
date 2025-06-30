@@ -9,7 +9,13 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        name: 'ChiroPlot',
+        authors: 'Aligned Chiro Plot',
+        license: 'license.txt',
+        setupExe: 'ChiroPlot.exe',
+        setupMsi: 'ChiroPlot.msi',
+      },
     },
     {
       name: '@electron-forge/maker-zip',
