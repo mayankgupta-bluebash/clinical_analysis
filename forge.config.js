@@ -13,6 +13,16 @@ module.exports = {
         language: 1033,
         manufacturer: 'Aligned Chiro Plot',
         upgradeCode: 'e79e4c8f-9d59-4c58-9b0c-2e1049e6513f',
+        name: 'ChiroPlot',
+        authors: 'Aligned Chiro Plot',
+        license: 'license.txt',
+        features: {
+          autoLaunch: true,
+          autoUpdate: true,
+        },
+        ui: {
+          chooseDirectory: true,
+        },
       },
     },
     {
