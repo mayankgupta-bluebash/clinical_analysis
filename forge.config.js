@@ -12,17 +12,26 @@ module.exports = {
       config: {
         language: 1033,
         manufacturer: 'Aligned Chiro Plot',
-        upgradeCode: 'e79e4c8f-9d59-4c58-9b0c-2e1049e6513f',
         name: 'ChiroPlot',
-        authors: 'Aligned Chiro Plot',
+        version: '1.0.0',
+        upgradeCode: 'e79e4c8f-9d59-4c58-9b0c-2e1049e6513f',
         license: 'license.txt',
+
+        ui: {
+          chooseDirectory: true,
+          perMachine: false,
+          enableLog: true,
+          includeLicense: true,
+        },
+
         features: {
           autoLaunch: true,
           autoUpdate: true,
+          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
         },
-        ui: {
-          chooseDirectory: true,
-        },
+
+        shortcutName: 'ChiroPlot',
       },
     },
     {
@@ -41,11 +50,15 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        name: 'ChiroPlot',
+      },
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        name: 'ChiroPlot',
+      },
     },
   ],
   plugins: [

@@ -32,6 +32,7 @@
     "vite": "^5.4.19"
   },
   "dependencies": {
+    "@electron-forge/maker-pkg": "^7.8.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "dicom-parser": "^1.8.21",
