@@ -15,7 +15,7 @@ module.exports = {
         name: 'ChiroPlot',
         version: '1.0.0',
         upgradeCode: 'e79e4c8f-9d59-4c58-9b0c-2e1049e6513f',
-        license: 'license.txt',
+        license: './license.txt',
 
         ui: {
           chooseDirectory: true,
