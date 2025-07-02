@@ -1,6 +1,6 @@
 {
   "name": "chiro_plot",
-  "productName": "chiro_plot",
+  "productName": "Chiro Plot",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
