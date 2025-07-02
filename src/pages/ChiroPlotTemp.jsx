@@ -83,13 +83,8 @@ const ChiroPlot = () => {
 
   const handleCanvasClick = (e) => {
     if (!dicomImageData) return;
-    if (!drawingActual && pinPoints.length >= REGISTRATION_NAMES.length) {
-      drawLine();
-      return;
-    }
-    if (drawingActual && actualPoints.length >= REGISTRATION_NAMES.length) {
-      return;
-    }
+    if (!drawingActual && pinPoints.length >= REGISTRATION_NAMES.length) return;
+    if (drawingActual && actualPoints.length >= REGISTRATION_NAMES.length) return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -221,25 +216,22 @@ const ChiroPlot = () => {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      {/* Header */}
-      <header className='bg-[#002E6C] text-white flex flex-col md:flex-row justify-between items-center px-4 md:px-10 py-4 md:py-4'>
-        <div className='mb-2 md:mb-0'>
-          <h1 className='text-xl md:text-2xl font-bold'>X-Ray Analysis Platform</h1>
-          <p className='text-xs md:text-sm font-light'>Professional spinal alignment analysis tool</p>
+      <header className='bg-[#002E6C] text-white flex justify-between items-center px-10'>
+        <div>
+          <h1 className='text-2xl font-bold'>X-Ray Analysis Platform</h1>
+          <p className='text-sm font-light'>Professional spinal alignment analysis tool</p>
         </div>
         <div className='flex items-center gap-2'>
+          {/* Replace with your logo if available */}
           <img
             src={logo}
             alt='logo'
-            className='h-8 md:h-10'
           />
         </div>
       </header>
-      {/* Main Content */}
-      <div className='flex flex-col lg:flex-row gap-6 md:gap-8 px-2 md:px-6 lg:px-10 py-4 md:py-8'>
-        {/* Left Column: Workflow */}
-        <div className='w-full lg:w-1/5 mb-6 lg:mb-0'>
-          <div className='bg-white rounded-xl shadow p-4 md:p-6 mb-6'>
+      <div className='flex gap-8 px-10 py-8'>
+        <div className='w-1/5'>
+          <div className='bg-white rounded-xl shadow p-6 mb-6'>
             <label
               htmlFor='region-select'
               className='block font-semibold mb-2'>
@@ -249,7 +241,7 @@ const ChiroPlot = () => {
               id='region-select'
               value={selectedRegion}
               onChange={handleRegionChange}
-              className='w-full border border-gray-300 rounded px-3 py-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm'>
+              className='w-full border border-gray-300 rounded px-3 py-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400'>
               <option value='Spinal'>Spinal</option>
               <option value='Neck'>Neck</option>
             </select>
@@ -259,7 +251,7 @@ const ChiroPlot = () => {
                 <span className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${workflowStep > 1 ? 'bg-green-500' : 'bg-gray-300'}`}>
                   {workflowStep > 1 ? '✓' : '1'}
                 </span>
-                <span className='text-gray-800 text-sm md:text-base'>Upload X-Ray</span>
+                <span className='text-gray-800'>Upload X-Ray</span>
               </div>
               <div className='flex items-center mb-4'>
                 <span
@@ -268,7 +260,7 @@ const ChiroPlot = () => {
                   }`}>
                   {workflowStep > 2 ? '✓' : '2'}
                 </span>
-                <span className='text-gray-800 text-sm md:text-base'>Draw Incorrect Line</span>
+                <span className='text-gray-800'>Draw Incorrect Line</span>
               </div>
               <div className='flex items-center'>
                 <span
@@ -277,32 +269,31 @@ const ChiroPlot = () => {
                   }`}>
                   {workflowStep > 3 ? '✓' : '3'}
                 </span>
-                <span className='text-gray-800 text-sm md:text-base'>Draw Correct Line</span>
+                <span className='text-gray-800'>Draw Correct Line</span>
               </div>
             </div>
           </div>
         </div>
-        {/* Center Column: X-ray Image */}
-        <div className='flex-1 w-full'>
-          <div className='bg-white rounded-xl shadow p-4 md:p-6 flex flex-col items-center'>
-            <div className='flex flex-col sm:flex-row justify-between w-full mb-2 gap-2'>
-              <span className='font-semibold text-base md:text-lg'>X-Ray Image</span>
+
+        <div className='flex-1'>
+          <div className='bg-white rounded-xl shadow p-6 flex flex-col items-center'>
+            <div className='flex justify-between w-full mb-2'>
+              <span className='font-semibold text-lg'>X-Ray Image</span>
               <button
                 onClick={handleReset}
-                className='w-fit flex items-center gap-1 text-left rounded-lg px-4 py-1.5 text-sm text-[#898989] bg-white border border-[#AEAEAE]'>
+                className={`w-fit flex items-center gap-1 text-left rounded-lg px-4 py-1.5 text-sm text-[#898989]} bg-white border border-[#AEAEAE]`}>
                 <span>Reset</span>
                 <img
                   src={reset}
                   alt='reset icon'
-                  className='h-4 w-4'
                 />
               </button>
             </div>
-            <div className='flex flex-col items-center w-full'>
+            <div className='flex flex-col items-center'>
               {!dicomImageData && (
                 <div
                   {...getRootProps()}
-                  className={`w-full mb-2 p-4 border-2 border-dashed rounded-lg h-[320px] md:h-[400px] lg:h-[520px] flex justify-center items-center transition cursor-pointer ${
+                  className={`w-full mb-2 p-4 border-2 border-dashed rounded-lg h-[520px] flex justify-center items-center transition cursor-pointer ${
                     isDragActive ? 'border-[#E5E7EB]' : 'border-[#E5E7EB] bg-white'
                   }`}>
                   <input {...getInputProps()} />
@@ -310,10 +301,10 @@ const ChiroPlot = () => {
                     <img
                       src={uploadIcon}
                       alt=''
-                      className='w-8 md:w-10 mx-auto'
+                      className='w-10 mx-auto'
                     />
-                    <p className='text-center text-[#4F4F4F] text-sm md:text-base font-semibold'>Upload X-Ray Image</p>
-                    <p className='text-center font-medium text-[#898989] text-xs md:text-sm'>
+                    <p className='text-center text-[#4F4F4F] text-base font-semibold'>Upload X-Ray Image</p>
+                    <p className='text-center font-medium text-[#898989] text-sm'>
                       {isDragActive ? 'Drop the DICOM file here...' : 'Drag & drop a DICOM (.dcm) file here, or click to select'}
                     </p>
                     <div className='flex mt-1'>
@@ -322,23 +313,21 @@ const ChiroPlot = () => {
                   </div>
                 </div>
               )}
-              <div
-                className={`bg-white rounded-2xl flex flex-col items-center ${dicomImageData ? 'p-2 md:p-4' : 'hidden'}`}
-                style={{ width: '100%' }}>
+              <div className={`bg-white rounded-2xl flex flex-col items-center ${dicomImageData ? 'opacity-100  p-4 ' : 'opacity-0 h-0'}`}>
                 <canvas
                   ref={canvasRef}
                   width={520}
                   height={520}
                   onClick={handleCanvasClick}
-                  className='cursor-crosshair rounded-lg'
+                  className='cursor-crosshair border border-5 border-[#BCCBF6] rounded-lg'
                 />
               </div>
             </div>
-            <div className='flex flex-col sm:flex-row gap-2 w-full justify-end mt-2'>
+            <div className='flex gap-2 w-full justify-end mt-2'>
               <button
                 onClick={handleDownloadJPG}
                 disabled={!actualLineDrawn}
-                className={`w-fit text-left rounded-lg px-4 py-2 text-sm text-[#898989] ${
+                className={`w-fit text-left rounded-lg px-4 py-2 text-sm text-[#898989]} ${
                   !actualLineDrawn ? 'opacity-50 bg-[#EDEDED] cursor-not-allowed' : 'bg-white border border-[#AEAEAE]'
                 }`}>
                 Download as JPG
@@ -346,7 +335,7 @@ const ChiroPlot = () => {
               <button
                 onClick={handleDownloadPDF}
                 disabled={!actualLineDrawn}
-                className={`w-fit text-left rounded-lg px-4 py-2 text-sm text-[#898989] ${
+                className={`w-fit text-left rounded-lg px-4 py-2 text-sm text-[#898989]} ${
                   !actualLineDrawn ? 'opacity-50 bg-[#EDEDED] cursor-not-allowed' : 'bg-white border border-[#AEAEAE]'
                 }`}>
                 Download as PDF
@@ -354,10 +343,10 @@ const ChiroPlot = () => {
             </div>
           </div>
         </div>
-        {/* Right Column: Registration Points and Line Drawing */}
-        <div className='w-full lg:w-1/4 flex flex-col gap-6 mt-6 lg:mt-0'>
-          <div className='bg-white rounded-xl shadow p-4 md:p-6'>
-            <span className='font-semibold block mb-4 text-base md:text-lg'>Registration Points</span>
+
+        <div className='w-1/4 flex flex-col gap-6'>
+          <div className='bg-white rounded-xl shadow p-6'>
+            <span className='font-semibold block mb-4 text-lg'>Registration Points</span>
             <ul className='space-y-2'>
               {REGISTRATION_NAMES.map((name, idx) => (
                 <li
@@ -376,9 +365,9 @@ const ChiroPlot = () => {
               ))}
             </ul>
           </div>
-          <div className='bg-white rounded-xl shadow p-4 md:p-6'>
-            <span className='block mb-2 text-base md:text-lg'>Line Drawing</span>
-            <p className='text-gray-500 text-xs md:text-sm mb-4'>First, mark all registration points on the X-ray, then proceed to draw lines.</p>
+          <div className='bg-white rounded-xl shadow p-6'>
+            <span className='block mb-2 text-lg'>Line Drawing</span>
+            <p className='text-gray-500 text-sm mb-4'>First, mark all registration points on the X-ray, then proceed to draw lines.</p>
             <button
               onClick={drawLine}
               disabled={drawingActual ? actualPoints.length < 2 : pinPoints.length < 2}

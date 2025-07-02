@@ -83,13 +83,8 @@ const ChiroPlot = () => {
 
   const handleCanvasClick = (e) => {
     if (!dicomImageData) return;
-    if (!drawingActual && pinPoints.length >= REGISTRATION_NAMES.length) {
-      drawLine();
-      return;
-    }
-    if (drawingActual && actualPoints.length >= REGISTRATION_NAMES.length) {
-      return;
-    }
+    if (!drawingActual && pinPoints.length >= REGISTRATION_NAMES.length) return;
+    if (drawingActual && actualPoints.length >= REGISTRATION_NAMES.length) return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -222,7 +217,7 @@ const ChiroPlot = () => {
   return (
     <div className='min-h-screen bg-gray-50'>
       {/* Header */}
-      <header className='bg-[#002E6C] text-white flex flex-col md:flex-row justify-between items-center px-4 md:px-10 py-4 md:py-4'>
+      <header className='bg-[#002E6C] text-white flex flex-col md:flex-row justify-between items-center px-4 md:px-10 py-4 md:py-0'>
         <div className='mb-2 md:mb-0'>
           <h1 className='text-xl md:text-2xl font-bold'>X-Ray Analysis Platform</h1>
           <p className='text-xs md:text-sm font-light'>Professional spinal alignment analysis tool</p>
@@ -323,14 +318,14 @@ const ChiroPlot = () => {
                 </div>
               )}
               <div
-                className={`bg-white rounded-2xl flex flex-col items-center ${dicomImageData ? 'p-2 md:p-4' : 'hidden'}`}
+                className={`bg-white rounded-2xl flex flex-col items-center ${dicomImageData ? 'opacity-100 p-2 md:p-4' : 'opacity-0 h-0'}`}
                 style={{ width: '100%' }}>
                 <canvas
                   ref={canvasRef}
                   width={520}
                   height={520}
                   onClick={handleCanvasClick}
-                  className='cursor-crosshair rounded-lg'
+                  className='cursor-crosshair border border-5 border-[#BCCBF6] rounded-lg w-full max-w-[320px] md:max-w-[400px] lg:max-w-[520px] h-auto'
                 />
               </div>
             </div>
