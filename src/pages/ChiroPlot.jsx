@@ -217,6 +217,13 @@ const ChiroPlot = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   };
+
+  const handleResetImage = () => {
+    setDicomImageData(null);
+    setPinPoints([]);
+    setActualPoints([]);
+  };
+
   const workflowStep = !dicomImageData ? 1 : !lineDrawn ? 2 : !actualLineDrawn ? 3 : 4;
 
   return (
@@ -231,12 +238,12 @@ const ChiroPlot = () => {
           <img
             src={logo}
             alt='logo'
-            className='h-8 md:h-10'
+            className='h-8 md:h-14'
           />
         </div>
       </header>
       {/* Main Content */}
-      <div className='flex flex-col lg:flex-row gap-6 md:gap-8 px-2 md:px-6 lg:px-10 py-4 md:py-8'>
+      <div className='flex flex-col lg:flex-row gap-6 md:gap-8 px-2 md:px-6 lg:px-10 py-4 md:py-4'>
         {/* Left Column: Workflow */}
         <div className='w-full lg:w-1/5 mb-6 lg:mb-0'>
           <div className='bg-white rounded-xl shadow p-4 md:p-6 mb-6'>
@@ -253,32 +260,33 @@ const ChiroPlot = () => {
               <option value='Spinal'>Spinal</option>
               <option value='Neck'>Neck</option>
             </select>
-            <div className='mt-2'>
-              {/* Workflow Stepper */}
-              <div className='flex items-center mb-4'>
-                <span className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${workflowStep > 1 ? 'bg-green-500' : 'bg-gray-300'}`}>
-                  {workflowStep > 1 ? '✓' : '1'}
-                </span>
-                <span className='text-gray-800 text-sm md:text-base'>Upload X-Ray</span>
-              </div>
-              <div className='flex items-center mb-4'>
-                <span
-                  className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${
-                    workflowStep === 2 ? 'bg-blue-600' : workflowStep > 2 ? 'bg-green-500' : 'bg-gray-300'
-                  }`}>
-                  {workflowStep > 2 ? '✓' : '2'}
-                </span>
-                <span className='text-gray-800 text-sm md:text-base'>Draw Incorrect Line</span>
-              </div>
-              <div className='flex items-center'>
-                <span
-                  className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${
-                    workflowStep === 3 ? 'bg-blue-600' : workflowStep > 3 ? 'bg-green-500' : 'bg-gray-300'
-                  }`}>
-                  {workflowStep > 3 ? '✓' : '3'}
-                </span>
-                <span className='text-gray-800 text-sm md:text-base'>Draw Correct Line</span>
-              </div>
+          </div>
+          <div className='bg-white rounded-xl shadow p-4 md:p-6 mb-6 mt-2'>
+            {/* Workflow Stepper */}
+            <p className='block font-semibold mb-4'>WorkFlow</p>
+            <div className='flex items-center mb-4'>
+              <span className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${workflowStep > 1 ? 'bg-green-500' : 'bg-gray-300'}`}>
+                {workflowStep > 1 ? '✓' : '1'}
+              </span>
+              <span className='text-gray-800 text-sm md:text-base'>Upload X-Ray</span>
+            </div>
+            <div className='flex items-center mb-4'>
+              <span
+                className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${
+                  workflowStep === 2 ? 'bg-blue-600' : workflowStep > 2 ? 'bg-green-500' : 'bg-gray-300'
+                }`}>
+                {workflowStep > 2 ? '✓' : '2'}
+              </span>
+              <span className='text-gray-800 text-sm md:text-base'>Draw Incorrect Line</span>
+            </div>
+            <div className='flex items-center'>
+              <span
+                className={`rounded-full w-7 h-7 flex items-center justify-center mr-3 text-white text-lg font-bold ${
+                  workflowStep === 3 ? 'bg-blue-600' : workflowStep > 3 ? 'bg-green-500' : 'bg-gray-300'
+                }`}>
+                {workflowStep > 3 ? '✓' : '3'}
+              </span>
+              <span className='text-gray-800 text-sm md:text-base'>Draw Correct Line</span>
             </div>
           </div>
         </div>
@@ -287,23 +295,35 @@ const ChiroPlot = () => {
           <div className='bg-white rounded-xl shadow p-4 md:p-6 flex flex-col items-center'>
             <div className='flex flex-col sm:flex-row justify-between w-full mb-2 gap-2'>
               <span className='font-semibold text-base md:text-lg'>X-Ray Image</span>
-              <button
-                onClick={handleReset}
-                className='w-fit flex items-center gap-1 text-left rounded-lg px-4 py-1.5 text-sm text-[#898989] bg-white border border-[#AEAEAE]'>
-                <span>Reset</span>
-                <img
-                  src={reset}
-                  alt='reset icon'
-                  className='h-4 w-4'
-                />
-              </button>
+              <div className='flex gap-2'>
+                <button
+                  onClick={handleResetImage}
+                  className='w-fit flex items-center gap-1 text-left rounded-lg px-4 py-1.5 text-sm text-[#898989] bg-white border border-[#AEAEAE]'>
+                  <span>Change Image</span>
+                  <img
+                    src={reset}
+                    alt='reset icon'
+                    className='h-4 w-4'
+                  />
+                </button>
+                <button
+                  onClick={handleReset}
+                  className='w-fit flex items-center gap-1 text-left rounded-lg px-4 py-1.5 text-sm text-[#898989] bg-white border border-[#AEAEAE]'>
+                  <span>Reset</span>
+                  <img
+                    src={reset}
+                    alt='reset icon'
+                    className='h-4 w-4'
+                  />
+                </button>
+              </div>
             </div>
             <div className='flex flex-col items-center w-full'>
               {!dicomImageData && (
                 <div
                   {...getRootProps()}
                   className={`w-full mb-2 p-4 border-2 border-dashed rounded-lg h-[320px] md:h-[400px] lg:h-[520px] flex justify-center items-center transition cursor-pointer ${
-                    isDragActive ? 'border-[#E5E7EB]' : 'border-[#E5E7EB] bg-white'
+                    isDragActive ? 'border-blue-700' : 'border-[#E5E7EB] bg-white'
                   }`}>
                   <input {...getInputProps()} />
                   <div className='flex flex-col gap-2'>
@@ -317,7 +337,7 @@ const ChiroPlot = () => {
                       {isDragActive ? 'Drop the DICOM file here...' : 'Drag & drop a DICOM (.dcm) file here, or click to select'}
                     </p>
                     <div className='flex mt-1'>
-                      <button className='bg-white py-1 px-3 rounded-lg border border-[#AEAEAE] text-[#2B2B2B] text-xs mx-auto'>Browse File</button>
+                      <button className='bg-white py-1 px-3 rounded-lg border border-[#AEAEAE] text-[#2B2B2B] text-xs mx-auto cursor-pointer'>Browse File</button>
                     </div>
                   </div>
                 </div>
